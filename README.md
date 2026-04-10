@@ -1,16 +1,25 @@
-## Hi there 👋
+# Hi, I'm Julian Gonzalez
 
-<!--
-**juliangonzalez-tech/juliangonzalez-tech** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+High school student building AI, cybersecurity, and software projects.
 
-Here are some ideas to get you started:
+## About Me
+- Interested in artificial intelligence, cybersecurity, and software engineering
+- Building projects that solve real problems
+- Learning Python, web development, and security fundamentals
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+## Current Focus
+- AI projects
+- Cybersecurity tools
+- Real-world coding projects for portfolio growth
+
+## Projects
+I’m building and improving projects in:
+- AI
+- Cybersecurity
+- Web tools
+- Python
+
+## Goals
+- Keep building strong real-world projects
+- Grow as a developer and problem solver
+- Create a portfolio for internships, research, and college applications
