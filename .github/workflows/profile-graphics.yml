@@ -47,56 +47,67 @@ jobs:
           USERNAME: ${{ github.repository_owner }}
           SETTING_JSON: .github/profile-3d/settings.json
 
-      # github-readme-stats code run locally instead of its rate-limited public instance.
-      - name: Check out github-readme-stats
-        uses: actions/checkout@v7
-        with:
-          repository: anuraghazra/github-readme-stats
-          ref: 54a7985aeefda00d5eadb55b80c17c7f976c37d2
-          path: stats-src
-          persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 22
-
-      - name: Render statistics cards
+      # Statistics cards from the maintained successor of anuraghazra/github-readme-stats
+      # (stats-organization/github-readme-stats-action v2.1.0, MIT).
+      - name: Statistics card
         continue-on-error: true
-        working-directory: stats-src
-        env:
+        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
+        with:
+          card: stats
+          options: username=${{ github.repository_owner }}&show_icons=true&hide_rank=true&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          path: stats-out/stats.svg
+          core_version: 2.2.1
+          fail_on_error: true
           # Repo-scoped token: it can only read public data, so private repositories are never included.
-          PAT_1: ${{ secrets.GITHUB_TOKEN }}
-          PORT: "9000"
-          OWNER: ${{ github.repository_owner }}
-        run: |
-          npm ci --ignore-scripts --no-audit --no-fund
-          node express.js &
-          server=$!
-          trap 'kill $server 2>/dev/null || true' EXIT
-          for i in $(seq 1 30); do
-            curl -fs -o /dev/null "http://127.0.0.1:9000/api/pin?username=$OWNER&repo=notcooked" && break
-            sleep 1
-          done
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-          mkdir -p ../stats-out
-          THEME="bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true"
-          base="http://127.0.0.1:9000/api"
-          fetch() {
-            # github-readme-stats answers errors with HTTP 200 and an error card, so check the body too.
-            curl -fsS "$2" -o "../stats-out/$1.tmp"
-            if grep -qiE "something went wrong|rate limit|could not fetch|user not found|repo not found" "../stats-out/$1.tmp"; then
-              echo "::warning::$1 returned an error card"; rm -f "../stats-out/$1.tmp"; return 1
-            fi
-            mv "../stats-out/$1.tmp" "../stats-out/$1.svg"
-          }
-          rc=0
-          fetch stats       "$base?username=$OWNER&show_icons=true&hide_rank=true&$THEME" || rc=1
-          fetch langs       "$base/top-langs?username=$OWNER&layout=donut&exclude_repo=signal-lab,$OWNER&$THEME" || rc=1
-          fetch pin-notcooked    "$base/pin?username=$OWNER&repo=notcooked&$THEME" || rc=1
-          fetch pin-signalquarry "$base/pin?username=$OWNER&repo=signalquarry&$THEME" || rc=1
-          fetch pin-cipherscore  "$base/pin?username=$OWNER&repo=cipherscore&$THEME" || rc=1
-          exit $rc
+      - name: Top languages card
+        continue-on-error: true
+        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
+        with:
+          card: top-langs
+          options: username=${{ github.repository_owner }}&layout=donut&langs_count=6&exclude_repo=signal-lab,${{ github.repository_owner }}&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          path: stats-out/langs.svg
+          core_version: 2.2.1
+          fail_on_error: true
+          # Repo-scoped token: it can only read public data, so private repositories are never included.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Repository card (notcooked)
+        continue-on-error: true
+        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
+        with:
+          card: pin
+          options: username=${{ github.repository_owner }}&repo=notcooked&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          path: stats-out/pin-notcooked.svg
+          core_version: 2.2.1
+          fail_on_error: true
+          # Repo-scoped token: it can only read public data, so private repositories are never included.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Repository card (signalquarry)
+        continue-on-error: true
+        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
+        with:
+          card: pin
+          options: username=${{ github.repository_owner }}&repo=signalquarry&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          path: stats-out/pin-signalquarry.svg
+          core_version: 2.2.1
+          fail_on_error: true
+          # Repo-scoped token: it can only read public data, so private repositories are never included.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Repository card (cipherscore)
+        continue-on-error: true
+        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
+        with:
+          card: pin
+          options: username=${{ github.repository_owner }}&repo=cipherscore&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          path: stats-out/pin-cipherscore.svg
+          core_version: 2.2.1
+          fail_on_error: true
+          # Repo-scoped token: it can only read public data, so private repositories are never included.
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Collect generated files
         run: |
