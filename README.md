@@ -18,8 +18,7 @@
 
 <br /><br />
 
-<img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/stats.svg" width="390" alt="GitHub statistics card" />
-<img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/langs.svg" width="390" alt="Most used languages donut chart" />
+<img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/stats.svg" width="390" alt="GitHub statistics card" />&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/langs.svg" width="390" alt="Most used languages donut chart" />
 
 <br /><br />
 

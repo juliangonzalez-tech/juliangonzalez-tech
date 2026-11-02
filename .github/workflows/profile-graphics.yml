@@ -54,7 +54,7 @@ jobs:
         uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
         with:
           card: stats
-          options: username=${{ github.repository_owner }}&show_icons=true&hide_rank=true&hide=prs,issues,contribs&include_all_commits=true&card_width=390&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
+          options: username=${{ github.repository_owner }}&show_icons=true&hide_rank=true&hide=prs,issues,contribs&include_all_commits=true&card_width=390&line_height=35&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
           path: stats-out/stats.svg
           core_version: 2.2.1
           fail_on_error: true
