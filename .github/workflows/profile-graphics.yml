@@ -54,7 +54,7 @@ jobs:
         uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
         with:
           card: stats
-          options: username=${{ github.repository_owner }}&show_icons=true&hide_rank=true&hide=prs,issues,contribs&include_all_commits=true&card_width=390&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          options: username=${{ github.repository_owner }}&show_icons=true&hide_rank=true&hide=prs,issues,contribs&include_all_commits=true&card_width=390&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
           path: stats-out/stats.svg
           core_version: 2.2.1
           fail_on_error: true
@@ -66,7 +66,7 @@ jobs:
         uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
         with:
           card: top-langs
-          options: username=${{ github.repository_owner }}&layout=donut&langs_count=6&exclude_repo=signal-lab,${{ github.repository_owner }}&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          options: username=${{ github.repository_owner }}&layout=compact&langs_count=5&card_width=390&exclude_repo=signal-lab,${{ github.repository_owner }}&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
           path: stats-out/langs.svg
           core_version: 2.2.1
           fail_on_error: true
@@ -78,7 +78,7 @@ jobs:
         uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
         with:
           card: pin
-          options: username=${{ github.repository_owner }}&repo=notcooked&description_lines_count=2&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          options: username=${{ github.repository_owner }}&repo=notcooked&description_lines_count=2&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
           path: stats-out/pin-notcooked.svg
           core_version: 2.2.1
           fail_on_error: true
@@ -90,7 +90,7 @@ jobs:
         uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
         with:
           card: pin
-          options: username=${{ github.repository_owner }}&repo=signalquarry&description_lines_count=2&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          options: username=${{ github.repository_owner }}&repo=signalquarry&description_lines_count=2&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
           path: stats-out/pin-signalquarry.svg
           core_version: 2.2.1
           fail_on_error: true
@@ -102,7 +102,7 @@ jobs:
         uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
         with:
           card: pin
-          options: username=${{ github.repository_owner }}&repo=cipherscore&description_lines_count=2&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          options: username=${{ github.repository_owner }}&repo=cipherscore&description_lines_count=2&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
           path: stats-out/pin-cipherscore.svg
           core_version: 2.2.1
           fail_on_error: true
@@ -114,6 +114,13 @@ jobs:
           shopt -s nullglob
           # Only successfully generated files overwrite the previous ones.
           for f in dist/*.svg profile-3d-contrib/*.svg stats-out/*.svg; do cp "$f" out/; done
+          # Keep only files the README uses, so stale outputs from earlier experiments disappear.
+          for f in out/*; do
+            case "$(basename "$f")" in
+              README.md|pacman-contribution-graph-dark.svg|pacman-contribution-graph.svg|profile-3d-night.svg|stats.svg|langs.svg|pin-notcooked.svg|pin-signalquarry.svg|pin-cipherscore.svg) ;;
+              *) rm -f "$f" ;;
+            esac
+          done
           echo "Files now on the generated branch:"
           ls -la out | grep -v "^total"
 

@@ -4,7 +4,7 @@
 
 <img src="./assets/typing.svg" alt="Animated intro: Hi, I'm Julian Gonzalez. Building AI, cybersecurity and software. Founder of NotCooked. Python, TypeScript, React Native. Piano, track, code." />
 
-<br />
+<br /><br />
 
 <img src="./assets/ribbon-tech-stack.svg" width="440" alt="Tech stack" />
 
@@ -43,15 +43,13 @@
 
 <br /><br />
 
-<a href="https://github.com/juliangonzalez-tech/notcooked"><img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/pin-notcooked.svg" width="400" alt="NotCooked repository card" /></a>
-<br />
-<a href="https://github.com/juliangonzalez-tech/signalquarry"><img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/pin-signalquarry.svg" width="400" alt="SignalQuarry repository card" /></a>
-<br />
-<a href="https://github.com/juliangonzalez-tech/cipherscore"><img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/pin-cipherscore.svg" width="400" alt="CipherScore repository card" /></a>
+<a href="https://github.com/juliangonzalez-tech/notcooked"><img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/pin-notcooked.svg" width="270" alt="NotCooked repository card" /></a>
+<a href="https://github.com/juliangonzalez-tech/signalquarry"><img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/pin-signalquarry.svg" width="270" alt="SignalQuarry repository card" /></a>
+<a href="https://github.com/juliangonzalez-tech/cipherscore"><img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/pin-cipherscore.svg" width="270" alt="CipherScore repository card" /></a>
 
 <br /><br />
 
-<img src="./assets/ribbon-off-the-clock.svg" width="440" alt="Off the clock" />
+<img src="./assets/ribbon-soundtrack.svg" width="440" alt="Soundtrack" />
 
 <br /><br />
 
