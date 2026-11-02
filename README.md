@@ -69,7 +69,16 @@ In my evaluations, random splits leaked exact copies of training attacks into th
 
 **Current interests:** prompt injection • distribution shift • trustworthy AI • practical student tools
 
-### `04 /` Beyond code
+### `04 /` Contributions in motion
+
+<!-- Generated daily by .github/workflows/snake.yml after first successful run -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/output/github-snake-dark.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/output/github-snake.svg" />
+  <img alt="Animated GitHub contribution snake" src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/output/github-snake.svg" />
+</picture>
+
+### `05 /` Beyond code
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/main/assets/music-still.png" />
