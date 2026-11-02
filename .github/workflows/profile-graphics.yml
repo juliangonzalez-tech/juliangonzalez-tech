@@ -36,7 +36,7 @@ jobs:
         uses: abozanona/pacman-contribution-graph@294c47eff28a41339a279107ae771b5fa020037a
         with:
           github_user_name: ${{ github.repository_owner }}
-          games: pacman,breakout,galaga
+          games: pacman
 
       # 3D contribution calendar (yoshi389111/github-profile-3d-contrib, v0.9.3).
       - name: 3D contribution graph
@@ -54,7 +54,7 @@ jobs:
         uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
         with:
           card: stats
-          options: username=${{ github.repository_owner }}&show_icons=true&hide_rank=true&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          options: username=${{ github.repository_owner }}&show_icons=true&hide_rank=true&hide=prs,issues,contribs&include_all_commits=true&card_width=390&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
           path: stats-out/stats.svg
           core_version: 2.2.1
           fail_on_error: true
@@ -78,7 +78,7 @@ jobs:
         uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
         with:
           card: pin
-          options: username=${{ github.repository_owner }}&repo=notcooked&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          options: username=${{ github.repository_owner }}&repo=notcooked&description_lines_count=2&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
           path: stats-out/pin-notcooked.svg
           core_version: 2.2.1
           fail_on_error: true
@@ -90,7 +90,7 @@ jobs:
         uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
         with:
           card: pin
-          options: username=${{ github.repository_owner }}&repo=signalquarry&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          options: username=${{ github.repository_owner }}&repo=signalquarry&description_lines_count=2&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
           path: stats-out/pin-signalquarry.svg
           core_version: 2.2.1
           fail_on_error: true
@@ -102,7 +102,7 @@ jobs:
         uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
         with:
           card: pin
-          options: username=${{ github.repository_owner }}&repo=cipherscore&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
+          options: username=${{ github.repository_owner }}&repo=cipherscore&description_lines_count=2&bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true
           path: stats-out/pin-cipherscore.svg
           core_version: 2.2.1
           fail_on_error: true

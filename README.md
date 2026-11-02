@@ -1,92 +1,69 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/main/assets/hero-still.png" />
-  <img src="./assets/hero.gif" width="100%" alt="Animated neural network introduction: Julian Gonzalez, AI Security, Software, Research" />
-</picture>
+<img src="./assets/banner.svg" width="100%" alt="Julian Gonzalez. AI, security, software, piano." />
 
-### Building useful software. Testing what AI systems miss.
+<img src="./assets/typing.svg" alt="Animated intro: Hi, I'm Julian Gonzalez. Building AI, cybersecurity and software. Founder of NotCooked. Python, TypeScript, React Native. Piano, track, code." />
 
-I'm Julian, a high school student developer and independent researcher exploring **AI security, model reliability, and human-centered software**. I like building things that people actually use, then asking how those systems behave when conditions change.
+<br />
 
-[**Explore Signal Lab ↗**](https://juliangonzalez-tech.github.io/signal-lab/) · [**My repositories ↗**](https://github.com/juliangonzalez-tech?tab=repositories)
+<img src="./assets/ribbon-tech-stack.svg" width="440" alt="Tech stack" />
 
-</div>
+<br /><br />
 
----
+<img src="./assets/skills.svg" width="330" alt="Python, TypeScript, JavaScript, React, Next.js, Node.js, Tailwind CSS, Firebase, Vitest, Git, GitHub and GitHub Actions" />
 
-### `01 /` What I'm building
+<br /><br />
 
-<table>
-<tr>
-<td valign="top">
-<h3>📚 NotCooked</h3>
-A student-first planner that turns scattered coursework into a clear next step: <b>Canvas and Google Classroom imports</b>, next-task recommendations, and focus sessions. Built with <b>React Native, Expo, and Firebase</b> and shaped by feedback from 25+ beta-testing students.
-<br><br><b>Status:</b> private beta · source is private · <a href="https://github.com/juliangonzalez-tech/notcooked">Screenshots and write-up ↗</a>
-</td>
-</tr>
-<tr>
-<td valign="top">
-<h3>🔬 AI-security research</h3>
-How much do evaluation design and attacker novelty change measured prompt-injection detector robustness? I compare random and chronological splits and leave-one-attacker-out tests on adaptive human attacks (LLMail-Inject), using word- and character-level <b>TF-IDF</b> and <b>DistilBERT</b>.
-<br><br><b>Status:</b> independent study · results validated · paper not yet published
-</td>
-</tr>
-<tr>
-<td valign="top">
-<h3>🛡️ SignalQuarry</h3>
-An explainable security log analyzer: four rule-based detections, interactive dashboards, and alerts that show the exact log rows behind them. <b>Python, Streamlit, pandas.</b> Scored against a 45-case synthetic evaluation set, with its blind spots documented.
-<br><br><a href="https://github.com/juliangonzalez-tech/signalquarry">Open the repository ↗</a>
-</td>
-</tr>
-<tr>
-<td valign="top">
-<h3>🔐 CipherScore</h3>
-A browser-based password checker and generator: CSPRNG generation, EFF passphrases, zxcvbn-ts estimates, and a k-anonymity breach check that sends only a 5-character hash prefix. <b>Next.js, TypeScript, Tailwind CSS.</b>
-<br><br><a href="https://github.com/juliangonzalez-tech/cipherscore">Open the repository ↗</a>
-</td>
-</tr>
-<tr>
-<td valign="top">
-<h3>🎮 Signal Lab</h3>
-An experimental, interactive mini-site where visitors repair a simulated signal network. A playful companion to the research theme.
-<br><br><a href="https://juliangonzalez-tech.github.io/signal-lab/">Open the interactive lab ↗</a>
-</td>
-</tr>
-</table>
+<img src="./assets/ribbon-stats.svg" width="440" alt="Stats" />
 
-### `02 /` The toolkit
+<br /><br />
 
-**Languages:** Python · TypeScript · JavaScript  
-**Build:** React Native · Expo · Firebase · Next.js · Streamlit · GitHub Actions  
-**Explore:** Machine learning · NLP · Evaluation methodology · Defensive security
+<img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/stats.svg" width="390" alt="GitHub statistics card" />
+<img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/langs.svg" width="390" alt="Most used languages donut chart" />
 
-### `03 /` Research mentality
+<br /><br />
 
-> A detector looking strong on familiar examples doesn't tell the whole story. I care about how systems behave on the examples they haven't learned to expect.
+<img src="./assets/ribbon-arcade.svg" width="440" alt="Arcade mode" />
 
-In my evaluations, random splits leaked exact copies of training attacks into the test set far more often than chronological splits (about 62.8% vs 4.3%), while previously unseen attackers varied much more than time alone. I also write down what the results *don't* show: they don't say every future attack is harder, or that every unseen attacker causes a large drop.
+<br /><br />
 
-**Current interests:** prompt injection • distribution shift • trustworthy AI • practical student tools
+<img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/pacman-contribution-graph-dark.svg" width="100%" alt="Animated Pac-Man eating through my GitHub contribution graph while ghosts chase" />
 
-### `04 /` Contributions in motion
+<br /><br />
 
-<!-- Generated daily by .github/workflows/snake.yml after first successful run -->
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/output/github-snake-dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/output/github-snake.svg" />
-  <img alt="Animated GitHub contribution snake" src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/output/github-snake.svg" />
-</picture>
+<img src="./assets/ribbon-contributions-3d.svg" width="440" alt="Contributions in 3D" />
 
-### `05 /` Beyond code
+<br /><br />
+
+<img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/profile-3d-night.svg" width="100%" alt="Animated 3D view of my GitHub contributions" />
+
+<br /><br />
+
+<img src="./assets/ribbon-projects.svg" width="440" alt="Featured projects" />
+
+<br /><br />
+
+<a href="https://github.com/juliangonzalez-tech/notcooked"><img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/pin-notcooked.svg" width="400" alt="NotCooked repository card" /></a>
+<br />
+<a href="https://github.com/juliangonzalez-tech/signalquarry"><img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/pin-signalquarry.svg" width="400" alt="SignalQuarry repository card" /></a>
+<br />
+<a href="https://github.com/juliangonzalez-tech/cipherscore"><img src="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/generated/pin-cipherscore.svg" width="400" alt="CipherScore repository card" /></a>
+
+<br /><br />
+
+<img src="./assets/ribbon-off-the-clock.svg" width="440" alt="Off the clock" />
+
+<br /><br />
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/juliangonzalez-tech/juliangonzalez-tech/main/assets/music-still.png" />
-  <img src="./assets/music.gif" width="100%" alt="Animated sound waves representing Julian's interest in piano and music" />
+  <img src="./assets/music.gif" width="100%" alt="Animated sound waves: off the clock, piano, running, curiosity" />
 </picture>
 
-I play piano, run track, and enjoy the overlap between technical precision and creative expression. Music gives me a different kind of problem to solve.
+<br />
 
----
+<img src="./assets/footer.svg" width="100%" alt="" />
 
-<div align="center"><sub>Thoughtfully built, not auto-generated statistics. · <a href="https://juliangonzalez-tech.github.io/signal-lab/">Enter Signal Lab</a></sub></div>
+<sub>Built with open-source tools. <a href="./THIRD_PARTY_NOTICES.md">Credits and licenses</a></sub>
+
+</div>
