@@ -1,0 +1,117 @@
+name: Profile graphics
+
+# Regenerates the live visuals used by README.md and publishes them to the
+# `generated` branch as one force-pushed commit (no history growth).
+# Third-party components are pinned to exact commits. See THIRD_PARTY_NOTICES.md.
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-graphics
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@v7
+
+      - name: Check out the generated branch
+        uses: actions/checkout@v7
+        with:
+          ref: generated
+          path: out
+
+      # Arcade games over the contribution calendar (abozanona/pacman-contribution-graph).
+      - name: Arcade contribution graphs
+        continue-on-error: true
+        uses: abozanona/pacman-contribution-graph@294c47eff28a41339a279107ae771b5fa020037a
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          games: pacman,breakout,galaga
+
+      # 3D contribution calendar (yoshi389111/github-profile-3d-contrib, v0.9.3).
+      - name: 3D contribution graph
+        continue-on-error: true
+        uses: yoshi389111/github-profile-3d-contrib@7d95e7d4cdc028dd1e1cbd957d65f35efb12ae39
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USERNAME: ${{ github.repository_owner }}
+          SETTING_JSON: .github/profile-3d/settings.json
+
+      # github-readme-stats code run locally instead of its rate-limited public instance.
+      - name: Check out github-readme-stats
+        uses: actions/checkout@v7
+        with:
+          repository: anuraghazra/github-readme-stats
+          ref: 54a7985aeefda00d5eadb55b80c17c7f976c37d2
+          path: stats-src
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Render statistics cards
+        continue-on-error: true
+        working-directory: stats-src
+        env:
+          # Repo-scoped token: it can only read public data, so private repositories are never included.
+          PAT_1: ${{ secrets.GITHUB_TOKEN }}
+          PORT: "9000"
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          node express.js &
+          server=$!
+          trap 'kill $server 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            curl -fs -o /dev/null "http://127.0.0.1:9000/api/pin?username=$OWNER&repo=notcooked" && break
+            sleep 1
+          done
+
+          mkdir -p ../stats-out
+          THEME="bg_color=0b1020&title_color=22d3ee&text_color=cbd5e1&icon_color=8b5cf6&border_color=1e293b&hide_border=true"
+          base="http://127.0.0.1:9000/api"
+          fetch() {
+            # github-readme-stats answers errors with HTTP 200 and an error card, so check the body too.
+            curl -fsS "$2" -o "../stats-out/$1.tmp"
+            if grep -qiE "something went wrong|rate limit|could not fetch|user not found|repo not found" "../stats-out/$1.tmp"; then
+              echo "::warning::$1 returned an error card"; rm -f "../stats-out/$1.tmp"; return 1
+            fi
+            mv "../stats-out/$1.tmp" "../stats-out/$1.svg"
+          }
+          rc=0
+          fetch stats       "$base?username=$OWNER&show_icons=true&hide_rank=true&$THEME" || rc=1
+          fetch langs       "$base/top-langs?username=$OWNER&layout=donut&exclude_repo=signal-lab,$OWNER&$THEME" || rc=1
+          fetch pin-notcooked    "$base/pin?username=$OWNER&repo=notcooked&$THEME" || rc=1
+          fetch pin-signalquarry "$base/pin?username=$OWNER&repo=signalquarry&$THEME" || rc=1
+          fetch pin-cipherscore  "$base/pin?username=$OWNER&repo=cipherscore&$THEME" || rc=1
+          exit $rc
+
+      - name: Collect generated files
+        run: |
+          shopt -s nullglob
+          # Only successfully generated files overwrite the previous ones.
+          for f in dist/*.svg profile-3d-contrib/*.svg stats-out/*.svg; do cp "$f" out/; done
+          echo "Files now on the generated branch:"
+          ls -la out | grep -v "^total"
+
+      - name: Publish to the generated branch
+        working-directory: out
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan publish
+          git add -A
+          git commit -q -m "Update generated profile graphics"
+          git push --force origin publish:generated
