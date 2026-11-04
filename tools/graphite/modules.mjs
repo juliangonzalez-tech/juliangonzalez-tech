@@ -1,11 +1,50 @@
 // Shared modules: stack, featured-work cards, piano signature, arcade label.
 // Original code; layout conventions follow the same four-colour theme model as ryme.md (MIT).
-import { Doc, C, panel, REDUCED_CSS } from "./lib.mjs";
+import { Doc, C, FONTS, panel, REDUCED_CSS } from "./lib.mjs";
 
 const REVEAL = `@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}`;
 
 // Only tools that appear in the user's own repositories (SignalQuarry, CipherScore, NotCooked).
+// The stack, simplified: languages large, frameworks and tooling as two quiet lines. No grid, no labels, no levels.
+// Only tools that appear in the user's own repositories (SignalQuarry, CipherScore, NotCooked).
+export const STACK = {
+  languages: ["Python", "TypeScript"],
+  frameworks: ["Expo", "React Native", "Next.js", "Tailwind CSS", "Streamlit", "Firebase"],
+  tooling: ["pytest", "Vitest", "Ruff", "Git", "GitHub Actions"],
+};
 export async function stack() {
+  const W = 416, H = 145;   // the same size as a project card, so it can sit beside the piano
+  const d = new Doc(W, H, { title: `Languages: ${STACK.languages.join(" and ")}. Tools: ${[...STACK.frameworks, ...STACK.tooling].join(", ")}.` });
+  d.style(REDUCED_CSS + REVEAL + `.r1{animation:rise .8s cubic-bezier(.2,.7,.2,1) .1s both}.r2{animation:rise .8s cubic-bezier(.2,.7,.2,1) .25s both}.r3{animation:rise .8s cubic-bezier(.2,.7,.2,1) .4s both}`);
+  d.add(panel(W, H));
+  const rec = (t) => d.span(t, { fam: "serif" });   // records glyphs for the embedded font subset
+  const runs = STACK.languages.map((l, i) => { rec(l); return i ? `<tspan fill="${C.sea}" dx="12">${rec("\u00b7") && "\u00b7"}</tspan><tspan fill="${C.offwhite}" dx="12">${l}</tspan>` : `<tspan fill="${C.offwhite}">${l}</tspan>`; }).join("");
+  d.add(`<g class="r1 rm"><text x="32" y="60" font-family="${FONTS.serif.stack.replace(/"/g, "'")}" font-size="42" letter-spacing="-0.6">${runs}</text></g>`);
+  const fw = STACK.frameworks, mid = Math.ceil(fw.length * 0.66);   // two short lines instead of one long one
+  d.add(`<g class="r2 rm">${d.text(fw.slice(0, mid).join("  \u00b7  "), { fam: "sans", size: 14, fill: C.offwhite, opacity: 0.86, x: 32, y: 90 })}${d.text(fw.slice(mid).join("  \u00b7  "), { fam: "sans", size: 14, fill: C.offwhite, opacity: 0.86, x: 32, y: 110 })}</g>`);
+  d.add(`<g class="r3 rm">${d.text(STACK.tooling.join("  \u00b7  "), { fam: "sans", size: 13, fill: "#8393a3", x: 32, y: 131 })}</g>`);
+  return d;
+}
+
+// The 520-wide single-panel stack of the first D2 preview, kept so it can be restored.
+export async function stackWide() {
+  const W = 520, H = 150;
+  const d = new Doc(W, H, { title: `Languages: ${STACK.languages.join(" and ")}. Tools: ${[...STACK.frameworks, ...STACK.tooling].join(", ")}.` });
+  d.style(REDUCED_CSS + REVEAL + `.r1{animation:rise .8s cubic-bezier(.2,.7,.2,1) .1s both}.r2{animation:rise .8s cubic-bezier(.2,.7,.2,1) .25s both}.r3{animation:rise .8s cubic-bezier(.2,.7,.2,1) .4s both}`);
+  d.add(panel(W, H));
+  const dot = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${C.sea}"/>`;
+  // languages: one serif line with a sea-glass dot between them. Spacing comes from dx on the tspans, because plain
+  // spaces collapse in SVG text.
+  const rec = (t) => d.span(t, { fam: "serif" }); // records the glyphs for the embedded font subset
+  const runs = STACK.languages.map((l, i) => { rec(l); return (i ? `<tspan fill="${C.sea}" dx="13">${rec("\u00b7") && "\u00b7"}</tspan><tspan fill="${C.offwhite}" dx="13">${l}</tspan>` : `<tspan fill="${C.offwhite}">${l}</tspan>`); }).join("");
+  d.add(`<g class="r1 rm"><text x="40" y="66" font-family="${FONTS.serif.stack.replace(/"/g, "'")}" font-size="44" letter-spacing="-0.6">${runs}</text></g>`);
+  d.add(`<g class="r2 rm">${d.text(STACK.frameworks.join("  \u00b7  "), { fam: "sans", size: 14.5, fill: C.offwhite, opacity: 0.86, x: 40, y: 104 })}</g>`);
+  d.add(`<g class="r3 rm">${d.text(STACK.tooling.join("  \u00b7  "), { fam: "sans", size: 13, fill: "#8393a3", x: 40, y: 128 })}</g>`);
+  return d;
+}
+
+// The previous six-cell grid, kept so it can be restored (see archive/graphite-arcade/).
+export async function stackGrid() {
   const W = 560, H = 214;
   const d = new Doc(W, H, { title: "Tools I use: Python, TypeScript, React Native, Expo, Next.js, Tailwind CSS, Firebase, Streamlit, pytest, Vitest, Ruff, Git and GitHub Actions." });
   d.style(REDUCED_CSS + REVEAL);

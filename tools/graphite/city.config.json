@@ -1,0 +1,8 @@
+{
+  "_comment": "Public repositories are discovered automatically. Only repositories that GitHub reports as public, non-fork and non-archived can appear; private repositories are never listed, read or named.",
+  "exclude": ["signal-lab"],
+  "maxRepos": 5,
+  "sealed": { "notcooked": "SOURCE PRIVATE" },
+  "visibleWeeks": 53,
+  "historyYears": 3
+}

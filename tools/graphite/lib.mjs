@@ -17,12 +17,16 @@ export const C = {
 export const FONTS = {
   serif: { family: "Instrument Serif", css: "Instrument+Serif:ital@0;1", stack: "'GA Serif','Instrument Serif',Georgia,serif" },
   sans: { family: "Inter", css: "Inter:wght@400;500", stack: "'GA Sans',Inter,system-ui,-apple-system,'Segoe UI',sans-serif" },
-  mono: { family: "JetBrains Mono", css: "JetBrains+Mono:wght@400;500", stack: "'GA Mono','JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace" },
+  mono: { family: "JetBrains Mono", css: "JetBrains+Mono:wght@400;500", fixedCss: "JetBrains+Mono:wght@400", stack: "'GA Mono','JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace" },
 };
 
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
-const CACHE = path.resolve(path.dirname(new URL(import.meta.url).pathname), ".font-cache");
-fs.mkdirSync(CACHE, { recursive: true });
+const HERE = path.dirname(new URL(import.meta.url).pathname);
+const CACHE = path.resolve(HERE, ".font-cache");
+// Generators that run in GitHub Actions (city.svg) use committed font subsets, so they never depend on a network font fetch.
+const FIXED_DIR = path.resolve(HERE, "fonts");
+// Everything in city.svg is upper-case mono; a small alphabet keeps the embedded font tiny.
+export const FIXED_CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_/:,?()'=+\u00b7\u2014\u2013\u2192\u00d7";
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 export const escapeXml = esc;
@@ -37,13 +41,19 @@ export function contrast(a, b) {
   return (x + 0.05) / (y + 0.05);
 }
 
-async function fetchSubset(famKey, text) {
+async function fetchSubset(famKey, text, { fixed = false } = {}) {
+  if (fixed) {
+    const ff = path.join(FIXED_DIR, `${famKey}.json`);
+    if (fs.existsSync(ff)) return JSON.parse(fs.readFileSync(ff, "utf8"));
+    text = FIXED_CHARS; // first run only: fetch once, then commit tools/graphite/fonts/*.json
+  }
+  fs.mkdirSync(CACHE, { recursive: true });
   const f = FONTS[famKey];
   const chars = [...new Set(text)].sort().join("");
   const key = crypto.createHash("sha1").update(famKey + "|" + chars).digest("hex").slice(0, 16);
   const file = path.join(CACHE, key + ".json");
   if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, "utf8"));
-  const url = `https://fonts.googleapis.com/css2?family=${f.css}&text=${encodeURIComponent(chars)}`;
+  const url = `https://fonts.googleapis.com/css2?family=${fixed && f.fixedCss ? f.fixedCss : f.css}&text=${encodeURIComponent(chars)}`;
   const css = await (await fetch(url, { headers: { "User-Agent": UA } })).text();
   const faces = [];
   for (const m of css.matchAll(/@font-face\s*\{([^}]*)\}/g)) {
@@ -56,13 +66,14 @@ async function fetchSubset(famKey, text) {
     faces.push({ style, weight, b64: buf.toString("base64"), bytes: buf.length });
   }
   fs.writeFileSync(file, JSON.stringify(faces));
+  if (fixed) { fs.mkdirSync(FIXED_DIR, { recursive: true }); fs.writeFileSync(path.join(FIXED_DIR, `${famKey}.json`), JSON.stringify(faces)); }
   return faces;
 }
 
 // SVG document builder that records which glyphs each font actually needs.
 export class Doc {
-  constructor(w, h, { title = "", desc = "" } = {}) {
-    this.w = w; this.h = h; this.title = title; this.desc = desc;
+  constructor(w, h, { title = "", desc = "", fixed = false } = {}) {
+    this.w = w; this.h = h; this.title = title; this.desc = desc; this.fixed = fixed;
     this.body = []; this.css = []; this.used = {}; // famKey -> {chars:Set, faces:Set("weight|style")}
   }
   add(s) { this.body.push(s); return this; }
@@ -70,7 +81,7 @@ export class Doc {
   // text element; records glyph usage. opts: fam, weight, style, size, fill, x, y, anchor, ls, cls, opacity
   text(content, o) {
     const u = (this.used[o.fam] ??= { chars: new Set(), faces: new Set() });
-    for (const ch of content) u.chars.add(ch);
+    for (const ch of content) { if (this.fixed && !FIXED_CHARS.includes(ch)) throw new Error(`glyph U+${ch.codePointAt(0).toString(16)} is not in the committed font subset`); u.chars.add(ch); }
     u.faces.add(`${o.weight ?? 400}|${o.style ?? "normal"}`);
     const attrs = [
       `x="${o.x}"`, `y="${o.y}"`, `font-family="${FONTS[o.fam].stack.replace(/"/g, "'")}"`,
@@ -101,7 +112,7 @@ export class Doc {
     const namePrefix = { serif: "GA Serif", sans: "GA Sans", mono: "GA Mono" };
     let fontBytes = 0;
     for (const [fam, u] of Object.entries(this.used)) {
-      const faces = await fetchSubset(fam, [...u.chars].join(""));
+      const faces = await fetchSubset(fam, [...u.chars].join(""), { fixed: this.fixed });
       for (const f of faces) {
         if (!u.faces.has(`${f.weight}|${f.style}`)) continue;
         fontBytes += f.bytes;
@@ -109,11 +120,13 @@ export class Doc {
       }
     }
     this.fontBytes = fontBytes;
+    // WebKit can clip the first and last glyphs of text near the edge after an embedded font loads; one invisible full-size repaint fixes it.
+    const REPAINT = `<rect width="${this.w}" height="${this.h}" fill="#0B1016" fill-opacity="0"><animate attributeName="fill-opacity" values="0;.012;0" dur="3s" fill="freeze"/></rect>`;
     const css = faceCss + this.css.join("\n");
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.w}" height="${this.h}" viewBox="0 0 ${this.w} ${this.h}" role="img" aria-label="${esc(this.title)}">` +
       (this.title ? `<title>${esc(this.title)}</title>` : "") +
       (this.desc ? `<desc>${esc(this.desc)}</desc>` : "") +
-      `<style>${css}</style>\n${this.body.join("\n")}\n</svg>\n`;
+      `<style>${css}</style>\n${this.body.join("\n")}\n${REPAINT}\n</svg>\n`;
   }
 }
 

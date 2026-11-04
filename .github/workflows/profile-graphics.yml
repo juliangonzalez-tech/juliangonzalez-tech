@@ -1,37 +1,87 @@
 name: Profile graphics
 
-# Regenerates the Pac-Man contribution graph used by README.md and publishes it to the
-# `generated` branch as one force-pushed commit (no history growth).
-# The 3D contribution graph is still generated but is not shown; docs/restore-3d.md explains how to bring it back.
-# Third-party components are pinned to exact commits. See THIRD_PARTY_NOTICES.md.
+# Keeps the profile's live graphics current and publishes them to the `generated` branch as one force-pushed commit
+# (no history growth, and nothing here ever touches `main` or counts as a contribution).
+#
+#   city     the night skyline + project districts (city.svg). Reads only the contribution calendar and the file trees of
+#            PUBLIC repositories. May use an optional read:user token (secret PROFILE_READ_TOKEN) so GitHub's own calendar,
+#            including private contribution counts if the account shows them, is used. No third-party code runs in this job.
+#   arcade   the Pac-Man and 3D contribution graphs. Preserved (docs/restore-pacman.md, docs/restore-3d.md), not displayed.
+#            Third-party actions, pinned to exact commits, run here with a read-only token and no secrets.
+#   publish  the only job that can write. It runs no third-party code and has no secrets.
+#
+# `generated-preview` is only used by runs started from a test branch.
+# Updates: every six hours, on manual dispatch, and when the generators change. First-party actions are pinned to commits.
 
 on:
   schedule:
-    - cron: "17 5 * * *"
+    - cron: "17 */6 * * *"
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "tools/graphite/**"
+      - ".github/workflows/profile-graphics.yml"
+      - ".github/profile-3d/**"
 
-permissions:
-  contents: write
+permissions: {}
+
+env:
+  # Runs from main publish to `generated`, the branch the live README reads. A run from any other branch (a test branch)
+  # publishes to `generated-preview` instead, so testing a change never touches what the live profile shows.
+  OUT_BRANCH: ${{ github.ref_name == 'main' && 'generated' || 'generated-preview' }}
 
 concurrency:
   group: profile-graphics
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  generate:
+  city:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Check out this repository
-        uses: actions/checkout@v7
-
-      - name: Check out the generated branch
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: generated
-          path: out
+          persist-credentials: false
 
-      # Arcade games over the contribution calendar (abozanona/pacman-contribution-graph).
+      - name: Test the generator
+        run: node --test tools/graphite/test/*.test.mjs
+
+      - name: Build the city
+        env:
+          # The optional PROFILE_READ_TOKEN (a read:user token) lets GitHub's own calendar include private contribution
+          # counts. Without it the built-in token is used and the calendar is the public one.
+          GH_TOKEN: ${{ secrets.PROFILE_READ_TOKEN || github.token }}
+        run: node tools/graphite/make-city.mjs --out city-out
+
+      - name: Verify the SVG before it can be published
+        run: node tools/graphite/verify-city.mjs city-out/city.svg city-out/city.meta.json
+
+      - name: Keep the result
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: city-files
+          path: |
+            city-out/city.svg
+            city-out/city.meta.json
+          if-no-files-found: error
+          retention-days: 3
+
+  arcade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Arcade games over the contribution calendar (abozanona/pacman-contribution-graph). No license: run unmodified only.
       - name: Arcade contribution graphs
         continue-on-error: true
         uses: abozanona/pacman-contribution-graph@294c47eff28a41339a279107ae771b5fa020037a
@@ -39,36 +89,97 @@ jobs:
           github_user_name: ${{ github.repository_owner }}
           games: pacman
 
-      # 3D contribution calendar (yoshi389111/github-profile-3d-contrib, v0.9.3). Preserved, not currently displayed.
+      # 3D contribution calendar (yoshi389111/github-profile-3d-contrib, v0.9.3).
       - name: 3D contribution graph
         continue-on-error: true
         uses: yoshi389111/github-profile-3d-contrib@7d95e7d4cdc028dd1e1cbd957d65f35efb12ae39
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           USERNAME: ${{ github.repository_owner }}
           SETTING_JSON: .github/profile-3d/settings.json
 
-      - name: Collect generated files
+      - name: Keep the results
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: arcade-files
+          path: |
+            dist/*.svg
+            profile-3d-contrib/*.svg
+          if-no-files-found: warn
+          retention-days: 3
+
+  publish:
+    needs: [city, arcade]
+    # Publish whatever succeeded; an upstream failure leaves the previous file for that graphic in place.
+    if: ${{ !cancelled() && (needs.city.result == 'success' || needs.arcade.result == 'success') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Check out this repository (read-only, for the verifier)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: src
+          persist-credentials: false
+
+      - name: Check out the generated branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.OUT_BRANCH }}
+          path: out
+
+      - name: Download this run's files
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: "*-files"
+          path: incoming
+          merge-multiple: true
+
+      - name: Collect only known, verified files
         run: |
-          shopt -s nullglob
-          # Only successfully generated files overwrite the previous ones.
-          for f in dist/*.svg profile-3d-contrib/*.svg; do cp "$f" out/; done
-          # Keep only the files the README (or the preserved 3D view) uses, so stale outputs disappear.
-          for f in out/*; do
+          mkdir -p incoming
+          # city.svg must pass the same gate again at the publish boundary.
+          if [ -f incoming/city.svg ]; then
+            if node src/tools/graphite/verify-city.mjs incoming/city.svg incoming/city.meta.json; then
+              cp incoming/city.svg out/city.svg
+            else
+              echo "::warning::city.svg failed verification; keeping the previous one"
+            fi
+          fi
+          # Only these arcade files are ever copied, and only if they are non-empty SVGs.
+          while IFS= read -r f; do
             case "$(basename "$f")" in
-              README.md|pacman-contribution-graph-dark.svg|pacman-contribution-graph.svg|profile-3d-night.svg) ;;
-              *) rm -f "$f" ;;
+              pacman-contribution-graph-dark.svg|pacman-contribution-graph.svg|profile-3d-night.svg)
+                if [ -s "$f" ] && head -c 4096 "$f" | grep -q "<svg"; then cp "$f" out/; fi ;;
+            esac
+          done < <(find incoming -type f -name '*.svg')
+          # Drop anything that is not part of the known set, so stale outputs disappear.
+          for f in out/* out/.[!.]*; do
+            [ -e "$f" ] || continue
+            case "$(basename "$f")" in
+              .git|README.md|heartbeat.txt|city.svg|pacman-contribution-graph-dark.svg|pacman-contribution-graph.svg|profile-3d-night.svg) ;;
+              *) rm -rf "$f" ;;
             esac
           done
+          # A monthly stamp keeps scheduled workflows from being disabled after 60 quiet days. It lives on the generated
+          # branch only, so it never appears in the contribution graph.
+          date -u +%Y-%m > out/heartbeat.txt
           echo "Files now on the generated branch:"
           ls -la out | grep -v "^total"
 
       - name: Publish to the generated branch
         working-directory: out
         run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Nothing changed; not publishing."
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout --orphan publish
           git add -A
           git commit -q -m "Update generated profile graphics"
-          git push --force origin publish:generated
+          case "$OUT_BRANCH" in generated|generated-preview) ;; *) echo "refusing to publish to $OUT_BRANCH"; exit 1 ;; esac
+          git push --force origin "publish:$OUT_BRANCH"
