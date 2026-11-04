@@ -1,7 +1,8 @@
 name: Profile graphics
 
-# Regenerates the live visuals used by README.md and publishes them to the
+# Regenerates the Pac-Man contribution graph used by README.md and publishes it to the
 # `generated` branch as one force-pushed commit (no history growth).
+# The 3D contribution graph is still generated but is not shown; docs/restore-3d.md explains how to bring it back.
 # Third-party components are pinned to exact commits. See THIRD_PARTY_NOTICES.md.
 
 on:
@@ -38,7 +39,7 @@ jobs:
           github_user_name: ${{ github.repository_owner }}
           games: pacman
 
-      # 3D contribution calendar (yoshi389111/github-profile-3d-contrib, v0.9.3).
+      # 3D contribution calendar (yoshi389111/github-profile-3d-contrib, v0.9.3). Preserved, not currently displayed.
       - name: 3D contribution graph
         continue-on-error: true
         uses: yoshi389111/github-profile-3d-contrib@7d95e7d4cdc028dd1e1cbd957d65f35efb12ae39
@@ -47,77 +48,15 @@ jobs:
           USERNAME: ${{ github.repository_owner }}
           SETTING_JSON: .github/profile-3d/settings.json
 
-      # Statistics cards from the maintained successor of anuraghazra/github-readme-stats
-      # (stats-organization/github-readme-stats-action v2.1.0, MIT).
-      - name: Statistics card
-        continue-on-error: true
-        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
-        with:
-          card: stats
-          options: username=${{ github.repository_owner }}&show_icons=true&hide_rank=true&hide=prs,issues,contribs&include_all_commits=true&card_width=390&line_height=32&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
-          path: stats-out/stats.svg
-          core_version: 2.2.1
-          fail_on_error: true
-          # Repo-scoped token: it can only read public data, so private repositories are never included.
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Top languages card
-        continue-on-error: true
-        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
-        with:
-          card: top-langs
-          options: username=${{ github.repository_owner }}&layout=compact&langs_count=5&card_width=390&exclude_repo=signal-lab,${{ github.repository_owner }}&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
-          path: stats-out/langs.svg
-          core_version: 2.2.1
-          fail_on_error: true
-          # Repo-scoped token: it can only read public data, so private repositories are never included.
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Repository card (notcooked)
-        continue-on-error: true
-        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
-        with:
-          card: pin
-          options: username=${{ github.repository_owner }}&repo=notcooked&description_lines_count=2&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
-          path: stats-out/pin-notcooked.svg
-          core_version: 2.2.1
-          fail_on_error: true
-          # Repo-scoped token: it can only read public data, so private repositories are never included.
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Repository card (signalquarry)
-        continue-on-error: true
-        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
-        with:
-          card: pin
-          options: username=${{ github.repository_owner }}&repo=signalquarry&description_lines_count=2&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
-          path: stats-out/pin-signalquarry.svg
-          core_version: 2.2.1
-          fail_on_error: true
-          # Repo-scoped token: it can only read public data, so private repositories are never included.
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Repository card (cipherscore)
-        continue-on-error: true
-        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21
-        with:
-          card: pin
-          options: username=${{ github.repository_owner }}&repo=cipherscore&description_lines_count=2&bg_color=0f1733&border_color=2d3f75&border_radius=14&title_color=22d3ee&text_color=d6e2f5&icon_color=a78bfa
-          path: stats-out/pin-cipherscore.svg
-          core_version: 2.2.1
-          fail_on_error: true
-          # Repo-scoped token: it can only read public data, so private repositories are never included.
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Collect generated files
         run: |
           shopt -s nullglob
           # Only successfully generated files overwrite the previous ones.
-          for f in dist/*.svg profile-3d-contrib/*.svg stats-out/*.svg; do cp "$f" out/; done
-          # Keep only files the README uses, so stale outputs from earlier experiments disappear.
+          for f in dist/*.svg profile-3d-contrib/*.svg; do cp "$f" out/; done
+          # Keep only the files the README (or the preserved 3D view) uses, so stale outputs disappear.
           for f in out/*; do
             case "$(basename "$f")" in
-              README.md|pacman-contribution-graph-dark.svg|pacman-contribution-graph.svg|profile-3d-night.svg|stats.svg|langs.svg|pin-notcooked.svg|pin-signalquarry.svg|pin-cipherscore.svg) ;;
+              README.md|pacman-contribution-graph-dark.svg|pacman-contribution-graph.svg|profile-3d-night.svg) ;;
               *) rm -f "$f" ;;
             esac
           done
