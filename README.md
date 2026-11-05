@@ -8,7 +8,7 @@
 
 <p><a href="https://github.com/juliangonzalez-tech/signalquarry"><img src="./assets/work-signalquarry.svg" width="416" alt="SignalQuarry. Explainable security log analyzer where every alert shows its evidence." /></a> <a href="https://github.com/juliangonzalez-tech/cipherscore"><img src="./assets/work-cipherscore.svg" width="416" alt="CipherScore. Password checker and generator that runs entirely in your browser." /></a></p>
 
-<p><img src="./assets/stack.svg" width="416" alt="Languages: Python, TypeScript and Java. Tools: Expo, React Native, Next.js, Tailwind CSS, Streamlit, Firebase, pytest, Vitest, Ruff, Git and GitHub Actions." /> <a href="https://juliangonzalez-tech.github.io/piano/"><img src="./assets/piano.svg" width="416" alt="A piano keyboard playing the opening of Beethoven's Pathétique Sonata, second movement, in sync with the notes of the score, signed Julian. Select it to open the full 88-key player." /></a></p>
+<p><img src="./assets/stack.svg" width="416" alt="Languages: Python, TypeScript and Java. Tools: Expo, React Native, Next.js, Tailwind CSS, Streamlit, Firebase, pytest, Vitest, Ruff, Git and GitHub Actions." /> <a href="https://juliangonzalez-tech.github.io/piano/"><img src="./assets/piano.svg" width="416" alt="A piano keyboard playing the opening of Beethoven's Pathétique Sonata, second movement, in sync with the notes of the score. Select it to open the full 88-key player." /></a></p>
 
 <sub>© 2026 Julian Gonzalez · <a href="./THIRD_PARTY_NOTICES.md">credits</a></sub>
 

@@ -7,7 +7,7 @@ import { keyboard, defs, noteName } from "./keyboard.mjs";
 
 const LABEL = "#8393a3";
 const DATA = JSON.parse(fs.readFileSync(new URL("./data/pathetique-2.json", import.meta.url), "utf8"));
-export const PIANO = { startBar: 1, endBar: 8, bpm: 32, lo: 31, hi: 71, keys: 24, w: 15.4, ratio: 3.8, W: 416 };
+export const PIANO = { startBar: 1, endBar: 8, bpm: 32, lo: 31, hi: 71, keys: 24, w: 15.9, ratio: 3.8, W: 416 };
 const REDUCED = `.still{display:none}@media (prefers-reduced-motion: reduce){.anim{display:none}.still{display:inline}}`;
 const arrow = (x, y) => `<path d="M${x} ${y + 16}L${x + 16} ${y}M${x + 2} ${y}H${x + 16}V${y + 14}" fill="none" stroke="${C.sea}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
 
@@ -51,19 +51,19 @@ export async function piano({ dev = false } = {}) {
   const d = DATA, P = pressesFor(d);
   if (P.outside.length) throw new Error(`notes outside the keyboard window: ${P.outside.map(noteName).join(",")}`);
   const D = Math.round((P.seconds + 2.4) * 10) / 10, W = PIANO.W, w = PIANO.w, h = Math.round(w * PIANO.ratio);
-  const kbWidth = w * PIANO.keys, x0 = Math.round(((W - kbWidth) / 2) * 10) / 10, y0 = 66, H = 145;
+  const kbWidth = w * PIANO.keys, x0 = Math.round(((W - kbWidth) / 2) * 10) / 10, y0 = 64, H = 145;
   const stillTick = 0, sounding = d.notes.filter(([t, dur]) => t <= stillTick && stillTick < t + dur).map((n) => n[2]);
   const probe = keyboard({ x0, y0, w, h, lo: PIANO.lo, hi: PIANO.hi, presses: new Map(), D });
   const kb = keyboard({ x0, y0, w, h, lo: PIANO.lo, hi: PIANO.hi, presses: P.map, D, still: sounding, dev, lamp: lamp(P.melody, probe.cx, D, y0 + h - 10) });
   const doc = new Doc(W, H, {
-    title: "A piano keyboard playing the opening of Beethoven's Pathétique Sonata, second movement, in sync with the notes of the score, signed Julian. Select it to open the full 88-key player.",
+    title: "A piano keyboard playing the opening of Beethoven's Pathétique Sonata, second movement, in sync with the notes of the score. Select it to open the full 88-key player.",
     desc: `Bars ${PIANO.startBar} to ${PIANO.endBar} of the public-domain score (${d.source.name}), looped. Pressed keys light up in sea-glass.`,
   });
   doc.style(REDUCED + `@keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}.hd{animation:rise .9s cubic-bezier(.2,.7,.2,1) .1s both}@media (prefers-reduced-motion: reduce){.hd{animation:none}}`);
   doc.add(panel(W, H));
   doc.add(`<defs>${defs(w, h)}</defs>`);
-  // header: the signature, the piece (large enough to stay legible when the panel shrinks on a phone), and the card arrow
-  doc.add(`<g class="hd">${doc.text("Julian", { fam: "serif", style: "italic", size: 34, fill: C.offwhite, x: 24, y: 42, ls: -0.5 })}${doc.text("BEETHOVEN  /  PATHÉTIQUE", { fam: "mono", size: 12, fill: LABEL, x: W - 58, y: 31, anchor: "end", ls: 1.3 })}${doc.text("ADAGIO CANTABILE", { fam: "mono", size: 11, fill: LABEL, x: W - 58, y: 47, anchor: "end", ls: 1.3 })}${arrow(W - 40, 22)}</g>`);
+  // header: the piece (large enough to stay legible on a phone) and the card arrow
+  doc.add(`<g class="hd">${doc.text("BEETHOVEN  /  PATHÉTIQUE", { fam: "mono", size: 12, fill: LABEL, x: x0, y: 33, ls: 1.3 })}${doc.text("ADAGIO CANTABILE", { fam: "mono", size: 11, fill: LABEL, x: x0, y: 49, ls: 1.3 })}${arrow(x0 + kbWidth - 16, 20)}</g>`);
   doc.add(kb.rail); doc.add(kb.layers);
   doc.meta = { W, H, loop: D, keys: kb.n, presses: P.count, x0, w, y0, lo: PIANO.lo, hi: PIANO.hi };
   return doc;
