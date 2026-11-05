@@ -35,58 +35,82 @@ export function defs(w, h) {
 <g id="wk"><path d="M0 0H${f2(wk)}V${f2(h - 2.4)}Q${f2(wk)} ${h} ${f2(wk - 2.4)} ${h}H2.4Q0 ${h} 0 ${f2(h - 2.4)}Z" fill="url(#wg)"/><path d="M0 ${f2(h - 6.5)}H${f2(wk)}V${f2(h - 2.4)}Q${f2(wk)} ${h} ${f2(wk - 2.4)} ${h}H2.4Q0 ${h} 0 ${f2(h - 2.4)}Z" fill="url(#wf)"/><rect width="${f2(wk)}" height="1" fill="#fff" fill-opacity=".5" y="${f2(h - 6.5)}"/></g>
 <g id="bk"><rect x="${f2(bw)}" width="3.4" height="${f2(bh + 1)}" fill="url(#bs)"/><rect width="${f2(bw)}" height="${f2(bh)}" rx="1.1" fill="url(#bg)"/><rect y="${f2(bh * 0.78)}" width="${f2(bw)}" height="${f2(bh * 0.22)}" rx="1.1" fill="url(#bf)"/><rect width="1" height="${f2(bh)}" fill="#fff" fill-opacity=".11"/><rect x="1" width="${f2(bw - 2)}" height=".9" fill="#fff" fill-opacity=".09"/></g>
 <g id="gw"><rect width="${f2(wk)}" height="${h}" rx="2" fill="url(#mw)"/><rect y="${f2(h - 2.4)}" width="${f2(wk)}" height="2.4" rx="1" fill="${C.sea}" fill-opacity=".95"/></g>
+<radialGradient id="lm" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${C.sea}" stop-opacity=".5"/><stop offset=".55" stop-color="${C.sea}" stop-opacity=".16"/><stop offset="1" stop-color="${C.sea}" stop-opacity="0"/></radialGradient>
 <g id="gb"><rect width="${f2(bw)}" height="${f2(bh)}" rx="1.1" fill="url(#mb)"/></g>`;
 }
 
-// Press timeline for one key: [[on, off], ...] in seconds, merged and clamped to the loop.
+// ---- timelines ------------------------------------------------------------------------------------------------
+// presses: [[on, off, level], ...] in seconds, level 0..1 (how strongly the note is voiced). The score's timing is never
+// changed: a key starts to move at the note's onset and starts to rise at its end; only the easing around those instants is
+// shaped, so the picture stays locked to the notes.
+const smooth = (t) => t * t * (3 - 2 * t);
 function merge(ints, D) {
   const out = [];
-  for (const [a, b] of ints.sort((x, y) => x[0] - y[0])) {
+  for (const [a, b, l = 1] of ints.sort((x, y) => x[0] - y[0])) {
     const last = out[out.length - 1];
-    if (last && a < last[1] + 0.14) last[1] = Math.max(last[1], b); else out.push([a, b]);
+    if (last && a < last[1] + 0.03) { last[1] = Math.max(last[1], b); last[2] = Math.max(last[2], l); } else out.push([a, b, l]);
   }
-  return out.map(([a, b]) => [a, Math.min(b, D - 0.35)]).filter(([a, b]) => b > a);
+  return out.map(([a, b, l]) => [a, Math.min(b, D - 0.9), l]).filter(([a, b]) => b > a);
 }
-function track(ints, D, depth) {
-  const DOWN = 0.07, UP = 0.24, kt = [0], y = [0], o = [0];
-  const push = (t, v) => { const tt = Math.min(D, Math.max(kt[kt.length - 1] + 0.0004 * D, t)); kt.push(tt); y.push(v); o.push(v); };
+const fmtT = (t, D) => (t / D).toFixed(4).replace(/0+$/, "").replace(/\.$/, "").replace(/^0\./, ".").replace(/^$/, "0");
+function emit(pts, D) { // pts: sorted [t, v]; times strictly increasing
+  const out = [[0, pts[0][1]]];
+  for (const [t, v] of pts) { const tt = Math.max(t, out[out.length - 1][0] + 0.0006 * D); if (tt >= D) break; out.push([tt, v]); }
+  out.push([D, out[out.length - 1][1] === 0 ? 0 : 0]);
+  return out;
+}
+const valueAt = (pts, t) => { for (let i = 1; i < pts.length; i++) if (t <= pts[i][0]) { const [t0, v0] = pts[i - 1], [t1, v1] = pts[i]; return v0 + ((v1 - v0) * (t - t0)) / Math.max(1e-9, t1 - t0); } return pts.at(-1)[1]; };
+// Physical key: eased descent over ~0.11 s, a held depth that settles slightly, a soft return over ~0.3 s.
+function keyTrack(ints, D, depth) {
+  const pts = [[0, 0]];
   for (const [a, b] of ints) {
-    if (a > kt[kt.length - 1] + 0.01) push(a, 0);
-    push(a + DOWN, 1); push(Math.max(a + DOWN + 0.02, b), 1); push(b + UP, 0);
+    const back = pts.filter((p) => p[0] < a); const v0 = valueAt(pts, a); pts.length = 0; pts.push(...back, [a, v0]);
+    [0.25, 0.6, 1].forEach((f) => pts.push([a + 0.11 * f, v0 + (1 - v0) * smooth(f)]));
+    pts.push([Math.max(b, a + 0.2), 1]);
+    [0.3, 0.65, 1].forEach((f) => pts.push([Math.max(b, a + 0.2) + 0.3 * f, 1 - smooth(f)]));
   }
-  if (kt[kt.length - 1] < D) { kt.push(D); y.push(0); o.push(0); }
-  const keyTimes = kt.map((t) => f2(Math.min(1, t / D)).replace(/^0\./, ".").replace(/^0$/, "0")).join(";");
-  // finer precision where needed: re-emit with 4 decimals
-  const kt4 = kt.map((t) => (t / D).toFixed(4).replace(/0+$/, "").replace(/\.$/, "").replace(/^0\./, ".")).map((s) => (s === "" ? "0" : s)).join(";");
-  return { keyTimes: kt4, trans: y.map((v) => `0 ${v ? depth : 0}`).join(";"), opac: o.join(";") };
+  const e = emit(pts, D);
+  return { keyTimes: e.map((p) => fmtT(p[0], D)).join(";"), values: e.map((p) => `0 ${+(p[1] * depth).toFixed(2)}`).join(";") };
+}
+// Light in the key: it swells with the note, eases down a little while the note is held, then lingers and fades after it ends.
+function glowTrack(ints, D) {
+  const pts = [[0, 0]];
+  for (const [a, b, L] of ints) {
+    const back = pts.filter((p) => p[0] < a); const v0 = valueAt(pts, a); pts.length = 0; pts.push(...back, [a, v0]);
+    pts.push([a + 0.07, v0 + (L - v0) * 0.55], [a + 0.16, L]);
+    const hold = Math.max(b, a + 0.2), held = hold - a > 0.6 ? L * 0.72 : L;
+    if (held < L) pts.push([a + 0.16 + (hold - a - 0.16) * 0.5, L * 0.88]);
+    pts.push([hold, held], [hold + 0.35, held * 0.42], [hold + 0.8, 0]);
+  }
+  const e = emit(pts, D);
+  return { keyTimes: e.map((p) => fmtT(p[0], D)).join(";"), values: e.map((p) => +p[1].toFixed(2)).join(";") };
 }
 
 // parts: everything a page needs to put a keyboard at (x0, y0)
-export function keyboard({ x0, y0, w, h, lo, hi, presses, D, still = [], dev = false }) {
-  const L = layout(lo, hi), bw = 0.583 * w, bh = 0.63 * h;
+export function keyboard({ x0, y0, w, h, lo, hi, presses, D, still = [], dev = false, lamp = null }) {
+  const L = layout(lo, hi), bw = 0.583 * w;
   const kbW = L.n * w;
-  const pressed = (m) => (presses.get(m) || []);
   const wx = (k) => x0 + k.i * w + 0.45, bx = (k) => x0 + k.u * w - bw / 2;
-  const ring = (id) => `<use href="#${id}"/>`;
+  const cx = (m) => { const k = L.white.find((q) => q.midi === m); if (k) return wx(k) + (w - 0.9) / 2; const q = L.black.find((r) => r.midi === m); return bx(q) + bw / 2; };
+  const dur = (id) => `dur="${D}s" repeatCount="indefinite"`;
   let wStatic = "", wAnim = "", wStill = "", bStatic = "", bAnim = "", bStill = "";
-  for (const k of L.white) {
-    const ints = merge(pressed(k.midi).map(([a, b]) => [a, b]), D);
-    if (!ints.length && !still.includes(k.midi)) { wStatic += `<use href="#wk" x="${f2(wx(k))}" y="${y0}"/>`; continue; }
-    if (ints.length) { const t = track(ints, D, 1.7); wAnim += `<g transform="translate(${f2(wx(k))} ${y0})"${dev ? ` data-m="${k.midi}"` : ""}><g><animateTransform attributeName="transform" type="translate" dur="${D}s" repeatCount="indefinite" keyTimes="${t.keyTimes}" values="${t.trans}"/><use href="#wk"/><use href="#gw" opacity="0"><animate attributeName="opacity" dur="${D}s" repeatCount="indefinite" keyTimes="${t.keyTimes}" values="${t.opac}"/></use></g></g>`; }
-    else wAnim += `<use href="#wk" x="${f2(wx(k))}" y="${y0}"/>`;
-    wStill += `<g transform="translate(${f2(wx(k))} ${y0 + (still.includes(k.midi) ? 1.7 : 0)})"><use href="#wk"/>${still.includes(k.midi) ? `<use href="#gw"/>` : ""}</g>`;
-  }
-  for (const k of L.black) {
-    const ints = merge(pressed(k.midi).map(([a, b]) => [a, b]), D);
-    if (!ints.length && !still.includes(k.midi)) { bStatic += `<use href="#bk" x="${f2(bx(k))}" y="${y0}"/>`; continue; }
-    if (ints.length) { const t = track(ints, D, 1.3); bAnim += `<g transform="translate(${f2(bx(k))} ${y0})"${dev ? ` data-m="${k.midi}"` : ""}><g><animateTransform attributeName="transform" type="translate" dur="${D}s" repeatCount="indefinite" keyTimes="${t.keyTimes}" values="${t.trans.replace(/ 1\.7/g, " 1.3")}"/><use href="#bk"/><use href="#gb" opacity="0"><animate attributeName="opacity" dur="${D}s" repeatCount="indefinite" keyTimes="${t.keyTimes}" values="${t.opac}"/></use></g></g>`; }
-    else bAnim += `<use href="#bk" x="${f2(bx(k))}" y="${y0}"/>`;
-    bStill += `<g transform="translate(${f2(bx(k))} ${y0 + (still.includes(k.midi) ? 1.3 : 0)})"><use href="#bk"/>${still.includes(k.midi) ? `<use href="#gb"/>` : ""}</g>`;
-  }
+  const part = (k, black) => {
+    const ints = merge(presses.get(k.midi) || [], D), on = still.includes(k.midi), X = black ? bx(k) : wx(k), id = black ? "bk" : "wk", g = black ? "gb" : "gw", depth = black ? 1.3 : 1.7;
+    if (!ints.length && !on) return [`<use href="#${id}" x="${f2(X)}" y="${y0}"/>`, "", ""];
+    let anim;
+    if (ints.length) {
+      const kt = keyTrack(ints, D, depth), gt = glowTrack(ints, D);
+      anim = `<g transform="translate(${f2(X)} ${y0})"${dev ? ` data-m="${k.midi}"` : ""}><g><animateTransform attributeName="transform" type="translate" ${dur()} keyTimes="${kt.keyTimes}" values="${kt.values}"/><use href="#${id}"/><use href="#${g}" opacity="0"><animate attributeName="opacity" ${dur()} keyTimes="${gt.keyTimes}" values="${gt.values}"/></use></g></g>`;
+    } else anim = `<use href="#${id}" x="${f2(X)}" y="${y0}"/>`;
+    const st = `<g transform="translate(${f2(X)} ${y0 + (on ? depth : 0)})"><use href="#${id}"/>${on ? `<use href="#${g}"/>` : ""}</g>`;
+    return [null, anim, st];
+  };
+  for (const k of L.white) { const [a, b, c] = part(k, false); if (a) wStatic += a; else { wAnim += b; wStill += c; } }
+  for (const k of L.black) { const [a, b, c] = part(k, true); if (a) bStatic += a; else { bAnim += b; bStill += c; } }
   const slot = `<rect x="${f2(x0 - 1)}" y="${y0 - 1}" width="${f2(kbW + 2)}" height="${h + 2}" rx="3" fill="#05080b"/>`;
   const rail = `<rect x="${f2(x0 - 5)}" y="${y0 - 9}" width="${f2(kbW + 10)}" height="9" rx="2.5" fill="url(#rl)"/><rect x="${f2(x0 - 5)}" y="${y0 - 9}" width="${f2(kbW + 10)}" height="1" rx=".5" fill="#fff" fill-opacity=".1"/>`;
-  return { kbW, n: L.n, rail,
-    layers: `${slot}<g>${wStatic}</g><g class="anim">${wAnim}</g><g class="still">${wStill}</g><g>${bStatic}</g><g class="anim">${bAnim}</g><g class="still">${bStill}</g>` };
+  return { kbW, n: L.n, rail, cx,
+    layers: `${slot}<g>${wStatic}</g><g class="anim">${wAnim}</g><g class="still">${wStill}</g>${lamp ? `<g class="anim">${lamp}</g>` : ""}<g>${bStatic}</g><g class="anim">${bAnim}</g><g class="still">${bStill}</g>` };
 }
 
 export const names = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];

@@ -8,7 +8,7 @@ const REVEAL = `@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opac
 // The stack, simplified: languages large, frameworks and tooling as two quiet lines. No grid, no labels, no levels.
 // Only tools that appear in the user's own repositories (SignalQuarry, CipherScore, NotCooked).
 export const STACK = {
-  languages: ["Python", "TypeScript"],
+  languages: ["Python", "TypeScript", "Java"],
   frameworks: ["Expo", "React Native", "Next.js", "Tailwind CSS", "Streamlit", "Firebase"],
   tooling: ["pytest", "Vitest", "Ruff", "Git", "GitHub Actions"],
 };
@@ -19,7 +19,7 @@ export async function stack() {
   d.add(panel(W, H));
   const rec = (t) => d.span(t, { fam: "serif" });   // records glyphs for the embedded font subset
   const runs = STACK.languages.map((l, i) => { rec(l); return i ? `<tspan fill="${C.sea}" dx="12">${rec("\u00b7") && "\u00b7"}</tspan><tspan fill="${C.offwhite}" dx="12">${l}</tspan>` : `<tspan fill="${C.offwhite}">${l}</tspan>`; }).join("");
-  d.add(`<g class="r1 rm"><text x="32" y="60" font-family="${FONTS.serif.stack.replace(/"/g, "'")}" font-size="42" letter-spacing="-0.6">${runs}</text></g>`);
+  d.add(`<g class="r1 rm"><text x="32" y="60" font-family="${FONTS.serif.stack.replace(/"/g, "'")}" font-size="36" letter-spacing="-0.6">${runs}</text></g>`);
   const fw = STACK.frameworks, mid = Math.ceil(fw.length * 0.66);   // two short lines instead of one long one
   d.add(`<g class="r2 rm">${d.text(fw.slice(0, mid).join("  \u00b7  "), { fam: "sans", size: 14, fill: C.offwhite, opacity: 0.86, x: 32, y: 90 })}${d.text(fw.slice(mid).join("  \u00b7  "), { fam: "sans", size: 14, fill: C.offwhite, opacity: 0.86, x: 32, y: 110 })}</g>`);
   d.add(`<g class="r3 rm">${d.text(STACK.tooling.join("  \u00b7  "), { fam: "sans", size: 13, fill: "#8393a3", x: 32, y: 131 })}</g>`);
